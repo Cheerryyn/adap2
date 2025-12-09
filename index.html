@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="kk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Матрицалық Орналасу және Флоучарттар — Құжаттама</title>
+    <style>
+         :root {
+            --bg: #0c1b2f;
+            --card: #141f3a;
+            --muted: #a0f0ff;
+            --accent: #00ffff;
+            --glass: rgba(255, 255, 255, 0.08);
+            --radius: 12px;
+            --gap: 18px;
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        body {
+            font-family: Inter, system-ui, Arial, sans-serif;
+            background: linear-gradient(180deg, #0c1b2f 0%, #0f203e 100%);
+            color: #e6f9ff;
+            margin: 0;
+            padding: 24px;
+        }
+        
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px
+        }
+        
+        header h1 {
+            font-size: 1.25rem;
+            margin: 0;
+            color: #00ffff
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--gap)
+        }
+        
+        .card {
+            grid-column: span 12;
+            background: linear-gradient(180deg, var(--card), #162b4c);
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: 0 6px 30px rgba(0, 255, 255, 0.3);
+            border: 1px solid var(--glass)
+        }
+        
+        @media(min-width:880px) {
+            .card.col-6 {
+                grid-column: span 6
+            }
+            .card.col-4 {
+                grid-column: span 4
+            }
+            .card.col-8 {
+                grid-column: span 8
+            }
+        }
+        
+        h2 {
+            margin: 0 0 12px 0;
+            color: #00ffff
+        }
+        
+        p {
+            color: var(--muted);
+            line-height: 1.6
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px
+        }
+        
+        th,
+        td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2)
+        }
+        
+        th {
+            color: #00ffff;
+            font-weight: 600
+        }
+        
+        .flowwrap {
+            display: flex;
+            flex-direction: column;
+            gap: 12px
+        }
+        
+        .flow-canvas {
+            background: linear-gradient(180deg, #09264a, #0b2d56);
+            padding: 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.15);
+            overflow: auto
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(0, 255, 255, 0.15);
+            border: 1px solid rgba(0, 255, 255, 0.25);
+            color: #a0faff;
+            font-size: 13px
+        }
+        
+        pre {
+            background: #0c2a4d;
+            padding: 14px;
+            border-radius: 10px;
+            overflow: auto;
+            color: #00ffff
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+        
+        button {
+            background: linear-gradient(90deg, var(--accent), #00ccff);
+            border: none;
+            color: #031022;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600
+        }
+        
+        button.ghost {
+            background: transparent;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            color: var(--muted)
+        }
+        
+        .muted {
+            color: var(--muted)
+        }
+        
+        .flex {
+            display: flex;
+            gap: 12px;
+            align-items: center
+        }
+        
+        @media(max-width:460px) {
+            body {
+                padding: 12px
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start
+            }
+            .controls {
+                width: 100%;
+                justify-content: space-between
+            }
+        }
+        
+        .node rect {
+            fill: #0a2b4d;
+            stroke: rgba(0, 255, 255, 0.3);
+            stroke-width: 1.5;
+            rx: 10
+        }
+        
+        .node text {
+            fill: #00ffff;
+            font-weight: 600
+        }
+        
+        .decision polygon {
+            fill: #0b3360;
+            stroke: rgba(0, 255, 255, 0.3);
+            stroke-width: 1.5
+        }
+        
+        .connector {
+            stroke: rgba(0, 255, 255, 0.3);
+            stroke-width: 2;
+            marker-end: url(#arrow);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Матрицалық Орналасу & Флоучарттар — Практикалық Құжат</h1>
+            <div class="controls">
+                <button id="toggleSize">Экранға байланысты мәтін</button>
+                <button class="ghost" id="printBtn">Басып шығару</button>
+            </div>
+        </header>
+
+        <main class="grid">
+            <!-- Overview Card -->
+            <section class="card col-8">
+                <h2>Матрицалық Орналасудың Негіздері</h2>
+                <p>Матрицалық құрылым — функциялық (вертикаль) және жобалық (горизонталь) өлшемдердің бірігуі арқылы екі өлшемді басқаруды қамтамасыз етеді. Бұл қос бағыныстылық (dual reporting) жүйесі қызметкерлер әрі функционалдық менеджерге, әрі жобалық
+                    менеджерге бағынатын жағдайды туғызады.</p>
+
+                <h3 style="margin-top:14px;color:#dff6ff">Екі өлшемнің сипаттамасы</h3>
+                <ul style="margin:8px 0 0 18px;color:var(--muted)">
+                    <li><strong>Функционалдық (Вертикаль):</strong> мамандық, кадр, техникалық даму — "қалай?" және "кім?".</li>
+                    <li><strong>Жобалық (Горизонталь):</strong> мақсаттар, кесте, бюджет — "не?" және "қашан?".</li>
+                </ul>
+
+                <h3 style="margin-top:14px;color:#dff6ff">Матрицалық түрлері</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Түрі</th>
+                            <th>Сипаттама</th>
+                            <th>Басшылық басымдылығы</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Әлсіз (Weak)</td>
+                            <td>Жоба менеджері үйлестіруші; ресурстарды функционалдық менеджер бөледі.</td>
+                            <td>Функционалдық</td>
+                        </tr>
+                        <tr>
+                            <td>Теңгерімді (Balanced)</td>
+                            <td>Екі менеджер тең құқықты; шешім бірлесіп қабылданады.</td>
+                            <td>Тең билік</td>
+                        </tr>
+                        <tr>
+                            <td>Күшті (Strong)</td>
+                            <td>Жоба менеджері шешім қабылдауда алда; функционалдық — техникалық қолдау.</td>
+                            <td>Жоба менеджері</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top:14px;color:#dff6ff">Қиындықтар</h3>
+                <ol style="color:var(--muted);margin-left:18px">
+                    <li>Рөлдердің айқын еместігі — приоритеттер қайсысы?</li>
+                    <li>Ресурстық шиеленістер — бір қызметкер бірнеше жобада қажет болуы мүмкін.</li>
+                </ol>
+            </section>
+
+
+            <section class="card col-4">
+                <h2>Флоучарт — Символдар</h2>
+                <p class="muted">ISO/ANSI стандарттағы негізгі символдар және олардың қолданылуы.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Символ</th>
+                            <th>Атауы</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Овал</td>
+                            <td>Терминатор (Start/End)</td>
+                        </tr>
+                        <tr>
+                            <td>Тік төртбұрыш</td>
+                            <td>Процесс</td>
+                        </tr>
+                        <tr>
+                            <td>Ромб</td>
+                            <td>Шешім (Yes/No)</td>
+                        </tr>
+                        <tr>
+                            <td>Параллелограмм</td>
+                            <td>Енгізу/Шығару</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+
+            <section class="card col-12">
+                <h2>Пример: Жаңа қызметкерді қабылдау — Флоучарт</h2>
+                <div class="flowwrap">
+                    <div class="flow-canvas">
+
+                        <svg width="100%" height="360" viewBox="0 0 1000 360" xmlns="http://www.w3.org/2000/svg" aria-label="Flowchart">
+              <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                  <path d="M0,0 L10,5 L0,10 z" fill="rgba(255,255,255,0.12)" />
+                </marker>
+              </defs>
+
+             
+              <g class="node" transform="translate(50,20)">
+                <rect width="140" height="48" rx="24"></rect>
+                <text x="70" y="30" text-anchor="middle">Start</text>
+              </g>
+
+            
+              <g class="node" transform="translate(240,20)">
+                <rect width="220" height="60" rx="8"></rect>
+                <text x="110" y="35" text-anchor="middle">Receive application</text>
+              </g>
+
+        
+              <g class="decision" transform="translate(520,12)">
+                <polygon points="60,0 140,40 60,80 -20,40"></polygon>
+                <text x="60" y="45" text-anchor="middle">Qualified?</text>
+              </g>
+
+          
+              <g class="node" transform="translate(740,12)">
+                <rect width="200" height="60" rx="10"></rect>
+                <text x="100" y="35" text-anchor="middle">Schedule interview</text>
+              </g>
+
+          
+              <g class="node" transform="translate(520,120)">
+                <rect width="220" height="60" rx="8"></rect>
+                <text x="110" y="35" text-anchor="middle">Send rejection</text>
+              </g>
+
+           
+              <path class="connector" d="M190 44 L240 44" />
+              <path class="connector" d="M460 50 L520 50" />
+              <path class="connector" d="M640 50 L740 50" />
+              <path class="connector" d="M600 92 L600 120" />
+              <path class="connector" d="M860 42 L980 42" />
+
+             
+              <g transform="translate(990,30)">
+                <rect width="80" height="40" rx="20" fill="#071a2b" stroke="rgba(255,255,255,0.06)" />
+                <text x="40" y="25" text-anchor="middle">End</text>
+              </g>
+            </svg>
+                    </div>
+
+                    <p class="muted">Бұл схемадан сіз процесс басталуынан соң өтетін негізгі тексерістер мен бағыттарды көресіз. SVG-ді оңай редакциялап, қосымша түйіндер, бағыттар қосуға болады.</p>
+                </div>
+            </section>
+
+
+            <section class="card col-6">
+                <h2>Қадамдық нұсқау — Матрицаны құру</h2>
+                <ol style="color:var(--muted);">
+                    <li>1. <strong>Мақсатты анықтау:</strong> ұйымың қандай жобалар жүргізеді, қай функциялар тұрақты ма?</li>
+                    <li>2. <strong>Рөлдерді белгілеу:</strong> функциялар мен жобалар бойынша жауапкершілікті анықтаңыз.</li>
+                    <li>3. <strong>Шешім қабылдау ережесі:</strong> қай мәселе бойынша кімнің соңғы сөзі екенін жазбаша бекітіңіз.</li>
+                    <li>4. <strong>Ресурстар үзілісін басқару:</strong> жоба приоритеттерін белгілеп, конфликтілерді шешу тәртібін енгізіңіз.</li>
+                    <li>5. <strong>Тестілеу:</strong> пилоттық жоба арқылы модельді тексеріп, түзетіңіз.</li>
+                </ol>
+            </section>
+
+
+            <section class="card col-6">
+                <h2>Флоучартты жасау — HTML/SVG мысал</h2>
+                <pre><code>&lt;svg width="800" height="200"&gt;
+  &lt;rect x="10" y="10" width="120" height="40" rx="8"/&gt;
+  &lt;text x="70" y="35" text-anchor="middle"&gt;Start&lt;/text&gt;
+  &lt;path d="M130 30 L250 30" stroke="#ccc"/&gt;
+  &lt;polygon points="300,10 350,30 300,50 250,30"/&gt;
+&lt;/svg&gt;
+</code></pre>
+                <p class="muted">SVG әдісі — статикалық диаграмма үшін жеңіл және вебке ыңғайлы.</p>
+            </section>
+
+
+            <section class="card col-12">
+                <h2>Құралдар және ұсыныстар</h2>
+                <div class="flex" style="margin-top:8px">
+                    <span class="badge">Draw.io / Diagrams.net</span>
+                    <span class="badge">Lucidchart</span>
+                    <span class="badge">Mermaid.js (markdown диаграммалары)</span>
+                    <span class="badge">SVG + D3 (динамикалық диаграммалар)</span>
+                </div>
+
+                <p style="margin-top:12px;color:var(--muted)">Таңдау процесі: егер сізге жылдам визуализация қажет болса — Draw.io немесе Mermaid қолайлы. Егер интерактивті, деректерге бай диаграмма керек болса — D3 немесе custom SVG шешімін таңдаңыз.</p>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('toggleSize');
+
+        function applyResponsiveText() {
+            const threshold = 800;
+            const body = document.body;
+            if (window.innerWidth > threshold) {
+                body.style.fontSize = '18px';
+            } else {
+                body.style.fontSize = '15px';
+            }
+        }
+        window.addEventListener('resize', applyResponsiveText);
+        applyResponsiveText();
+
+
+        document.getElementById('printBtn').addEventListener('click', () => window.print());
+    </script>
+</body>
+
+</html>
